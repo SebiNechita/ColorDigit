@@ -36,12 +36,19 @@ def apply_color(img_tensor, color_name):
     rgb_img = (rgb_img * 255).astype(np.uint8)
     return Image.fromarray(rgb_img)
 
-# === Generate TRAIN set ===
-used_counts = {i: 0 for i in range(30)}
+# === Generate TRAIN set with holdouts ===
 
+# === Define holdout combinations for training (e.g. blue 9) ===
+holdout_pairs = [(9, "blue"), (8, "green"), (7, "red")]
+used_counts = {i: 0 for i in range(30)}
 print("Generating training data...")
+
 for img, label in tqdm(mnist_train):
     for color in base_colors:
+        # Skip if this pair is in the holdout list
+        print(f"Processing label {label}, color {color}")
+        if (label, color) in holdout_pairs:
+            continue
         class_id = class_map[(label, color)]
         if used_counts[class_id] < train_counts[class_id]:
             colored_img = apply_color(img, color)
